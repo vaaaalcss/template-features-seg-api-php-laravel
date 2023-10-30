@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Place;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/places', function(){
+    $places = Place::all();
+
+    return response()->json([
+        'places' => $places
+    ]);
+});
+
+Route::get('places/{id}', function($id){
+    $place = Place::where('id', $id)->first();
+
+    return response()->json([
+        'place' => $place
+    ]);
+});
+
+Route::get('places/{id}', function($id){
+    $place = Place::where('id', $id)->first();
+
+    return response()->json([
+        'place' => $place
+    ]);
+});
+
+Route::delete('places/{id}', function($id){
+    Place::delete($id);
 });
