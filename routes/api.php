@@ -15,6 +15,24 @@ use App\Models\Place;
 |
 */
 
+// Create
+Route::post('/places', function(Request $request){
+    $place = $request->all();
+    $newPlaceSaved = false;
+
+    $newPlace = new Place;
+    $newPlace->name = $place['name'];
+    $newPlace->open = $place['open'];
+    $newPlace->save();
+
+    $newPlaceSaved = true;
+
+    return response()->json([
+        'newPlaceSaved' => $newPlaceSaved
+    ]);
+});
+
+// List
 Route::get('/places', function(){
     $places = Place::all();
 
@@ -23,22 +41,41 @@ Route::get('/places', function(){
     ]);
 });
 
+// Show
 Route::get('places/{id}', function($id){
-    $place = Place::where('id', $id)->first();
+    $place = Place::where('id', decrypt($id))->first();
 
     return response()->json([
         'place' => $place
     ]);
 });
 
-Route::get('places/{id}', function($id){
-    $place = Place::where('id', $id)->first();
+// Update
+Route::put('/places/{id}', function(Request $request, $id){
+    $place = $request->all();
+    $placeUpdated = false;
+
+    $placeToUpdate = Place::where('id', $id)->first();
+    $placeToUpdate->name = $place['name'];
+    $placeToUpdate->save();
+
+    $placeUpdated = true;
 
     return response()->json([
-        'place' => $place
+        'placeUpdated' => $placeUpdated
     ]);
 });
 
-Route::delete('places/{id}', function($id){
-    Place::delete($id);
+
+// Delete
+Route::delete('/places/{id}', function($id){
+    $placedDeleted = false;
+
+    Place::where('id', $id)->delete();
+
+    $placedDeleted = true;
+
+    return response()->json([
+        'placeDeleted' => $placedDeleted
+    ]);
 });
