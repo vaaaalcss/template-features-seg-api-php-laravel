@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Place;
+use App\Http\Controllers\PlacesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,66 +17,12 @@ use App\Models\Place;
 */
 
 // Create
-Route::post('/places', function(Request $request){
-    $place = $request->all();
-    $newPlaceSaved = false;
-
-    $newPlace = new Place;
-    $newPlace->name = $place['name'];
-    $newPlace->open = $place['open'];
-    $newPlace->save();
-
-    $newPlaceSaved = true;
-
-    return response()->json([
-        'newPlaceSaved' => $newPlaceSaved
-    ]);
-});
-
+Route::post('/places', [PlacesController::class, 'create']);
 // List
-Route::get('/places', function(){
-    $places = Place::all();
-
-    return response()->json([
-        'places' => $places
-    ]);
-});
-
+Route::get('/places', [PlacesController::class, 'index']);
 // Show
-Route::get('places/{id}', function($id){
-    $place = Place::where('id', decrypt($id))->first();
-
-    return response()->json([
-        'place' => $place
-    ]);
-});
-
+Route::get('places/{id}', [PlacesController::class, 'show']);
 // Update
-Route::put('/places/{id}', function(Request $request, $id){
-    $place = $request->all();
-    $placeUpdated = false;
-
-    $placeToUpdate = Place::where('id', $id)->first();
-    $placeToUpdate->name = $place['name'];
-    $placeToUpdate->save();
-
-    $placeUpdated = true;
-
-    return response()->json([
-        'placeUpdated' => $placeUpdated
-    ]);
-});
-
-
+Route::put('/places/{id}', [PlacesController::class, 'update']);
 // Delete
-Route::delete('/places/{id}', function($id){
-    $placedDeleted = false;
-
-    Place::where('id', $id)->delete();
-
-    $placedDeleted = true;
-
-    return response()->json([
-        'placeDeleted' => $placedDeleted
-    ]);
-});
+Route::delete('/places/{id}', [PlacesController::class, 'delete']);

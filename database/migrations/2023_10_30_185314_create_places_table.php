@@ -33,6 +33,7 @@ return new class extends Migration
             $table->time('closingHour')->nullable();
             $table->string('open')->default('Jueves, Viernes, Sábado, Domingo');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
