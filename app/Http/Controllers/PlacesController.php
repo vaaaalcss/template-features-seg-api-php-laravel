@@ -40,6 +40,7 @@ class PlacesController extends Controller
 
     public function index()
     {
+        /*$places = \DB::table('places')->get();*/
         $places = Place::all();
 
         return response()->json([
