@@ -40,7 +40,6 @@ class PlacesController extends Controller
 
     public function index()
     {
-        /*$places = \DB::table('places')->get();*/
         $places = Place::all();
 
         return response()->json([
@@ -50,7 +49,7 @@ class PlacesController extends Controller
 
     public function show($id)
     {
-        $place = Place::where('id', $id)->first();
+        $place = Place::where('id', decrypt($id))->first();
 
         return response()->json([
             'place' => $place
@@ -62,7 +61,7 @@ class PlacesController extends Controller
         $place = $request->all();
         $placeUpdated = false;
 
-        $placeToUpdate = Place::where('id', $id)->first();
+        $placeToUpdate = Place::where('id', decrypt($id))->first();
         $placeToUpdate->fill($place);
         $placeToUpdate->save();
 
@@ -77,7 +76,7 @@ class PlacesController extends Controller
     {
         $placedDeleted = false;
 
-        Place::where('id', $id)->delete();
+        Place::where('id', decrypt($id))->delete();
 
         $placedDeleted = true;
 

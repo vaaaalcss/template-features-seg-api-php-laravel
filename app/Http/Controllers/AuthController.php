@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -13,24 +15,47 @@ class AuthController extends Controller
 {
     function login(Request $request)
     {
-        $credentials = $request->all();
+        $tooManyAttempts = false;
         $token = null;
-        $currentDate = Carbon::now();
 
-        $user = User::where('email', $credentials['username'])->first();
-        $checkSession = !$user->sessionStartedAt ||
-                        $currentDate->diffInMinutes($user->sessionStartedAt) > 1;
+        $executed = RateLimiter::attempt(
+            $request->ip(),
+            $perTwoMinutes = 3, // Attempts
+            function() {
+                // Some action
+            },
+            $decayRate = 120, // Every two minutes
+        );
 
-        if( $user && $checkSession ) {
-            if( Hash::check($credentials['password'], $user->password) ){
-                $token = $user->createToken('api-security')->accessToken;
-                $user->sessionStartedAt = Carbon::now();
-                $user->save();
+        if ( !$executed ) {
+          $tooManyAttempts = true;
+        } else {
+
+            $credentials = $request->all();
+            $currentDate = Carbon::now();
+
+            $user = User::where('email', $credentials['username'])->first();
+
+            if( $user ){
+                $checkSession = !$user->sessionStartedAt ||
+                                $currentDate->diffInMinutes($user->sessionStartedAt) > 10;
+
+                if( $checkSession ) {
+                    if( Hash::check($credentials['password'], $user->password) ){
+                        $token = $user->createToken('api-security')->accessToken;
+                        $user->sessionStartedAt = Carbon::now();
+                        $user->save();
+
+                        RateLimiter::clear($request->ip());
+                    }
+                }
             }
         }
 
+
         return response()->json([
-            'token' => $token
+            'token' => $token,
+            'tooManyAttempts' => $tooManyAttempts
         ]);
     }
 
