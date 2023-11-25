@@ -20,7 +20,7 @@ class AuthController extends Controller
 
         $executed = RateLimiter::attempt(
             $request->ip(),
-            $perTwoMinutes = 3, // Attempts
+            $perTwoMinutes = 5, // Attempts
             function() {
                 // Some action
             },
@@ -32,6 +32,7 @@ class AuthController extends Controller
         } else {
 
             $credentials = $request->all();
+
             $currentDate = Carbon::now();
 
             $user = User::where('email', $credentials['username'])->first();
