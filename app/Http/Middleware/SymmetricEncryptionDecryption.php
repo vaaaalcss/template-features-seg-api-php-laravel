@@ -13,7 +13,7 @@ class SymmetricEncryptionDecryption
     protected $cipher = 'AES-256-CBC';
     protected $secret = 'oNSSASxLVso2ayG9gefIaDqn89y63z8C'; // 32 characters length
     protected $encryptApi = true;
-    protected $noApplyDecryptToUrls = [];
+    protected $noApplyToUrls = [];
 
     public function __construct(Application $app)
     {
@@ -24,8 +24,9 @@ class SymmetricEncryptionDecryption
     {
         if( $request->ajax() ){
 
-            $checkConfig = $this->encryptApi === true;
             $newRequest = $request;
+            $checkConfig = $this->encryptApi === true &&
+                          !$this->checkIgnoredUrls($request);
 
             if( $checkConfig ){
 
@@ -38,7 +39,10 @@ class SymmetricEncryptionDecryption
                     $content = $request->getContent();
 
                     if( $request->has('encrypted') ){
-                        $content = json_decode($request->getContent(), true);
+                        $content = json_decode(
+                            $request->getContent(),
+                            true
+                        );
                         $content = self::decrypt($content['encrypted']);
                     }
 
@@ -67,7 +71,9 @@ class SymmetricEncryptionDecryption
                 $response = $next($newRequest);
 
                 return response(
-                    ['encrypted' => self::encrypt($response->original)]
+                    [
+                        'encrypted' => self::encrypt($response->original)
+                    ]
                 );
 
             }
@@ -112,15 +118,30 @@ class SymmetricEncryptionDecryption
         return $encrypted.'|'.base64_encode($iv);
     }
 
-    private function getIv($length)
+    protected function getIv($length)
     {
         $iv = '';
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        for ($i = 0; $i < $length; $i++) {
+        for( $i = 0; $i < $length; $i++ ) {
             $iv .= $characters[ mt_rand(0, strlen($characters) - 1) ];
         }
 
         return $iv;
+    }
+
+    protected function checkIgnoredUrls(Request $request)
+    {
+        foreach( $this->noApplyToUrls as $url ) {
+            if ( $url !== '/' ) {
+                $url = trim($url, '/');
+            }
+
+            if ( $request->fullUrlIs($url) || $request->is($url) ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
