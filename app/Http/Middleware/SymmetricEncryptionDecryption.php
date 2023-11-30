@@ -2,10 +2,13 @@
 
 namespace App\Http\Middleware;
 
+header_remove('x-powered-by');
+
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Stevebauman\Purify\Facades\Purify;
 
 class SymmetricEncryptionDecryption
 {
@@ -100,7 +103,7 @@ class SymmetricEncryptionDecryption
             $iv
         );
 
-        return json_decode($decrypted);
+        return json_decode( Purify::clean($decrypted) );
     }
 
     public function encrypt($response)

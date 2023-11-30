@@ -13,7 +13,7 @@ class PlacesController extends Controller
     {
         $place = $request->all();
 
-        $validator = Validator::make(
+/*        $validator = Validator::make(
             $place,
             $rules = [
                 'name' => 'required|alpha_num|max:255',
@@ -23,7 +23,7 @@ class PlacesController extends Controller
 
         if( $validator->fails() ){
             return $validator->errors();
-        }
+        }*/
 
         $newPlaceSaved = false;
 
